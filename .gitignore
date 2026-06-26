@@ -7,3 +7,5 @@ build/
 *.egg-info/
 .vscode/
 .idea/
+alembic.ini
+*.db
