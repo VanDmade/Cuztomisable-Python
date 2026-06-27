@@ -1,4 +1,4 @@
-from .user import UserCreate, UserUpdate, UserResponse
-from .image import ImageCreate, ImageResponse
+from .users import UserCreate, UserUpdate, UserResponse
+from .images import ImageCreate, ImageResponse
 
 __all__ = ["UserCreate", "UserUpdate", "UserResponse", "ImageCreate", "ImageResponse"]
