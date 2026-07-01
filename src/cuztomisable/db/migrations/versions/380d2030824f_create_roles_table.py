@@ -19,10 +19,23 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
-    pass
+    op.create_table('roles',
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('deleted_by', sa.Uuid(), nullable=True),
+        sa.Column('created_by', sa.Uuid(), nullable=True),
+        sa.Column('name', sa.String(length=128), nullable=False),
+        sa.Column('slug', sa.String(length=64), nullable=False),
+        sa.Column('description', sa.Text(), nullable=True),
+        sa.ForeignKeyConstraint(['created_by'], ['users.id'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['deleted_by'], ['users.id'], ondelete='SET NULL'),
+        sa.PrimaryKeyConstraint('id'),
+    )
+    op.create_index('ix_roles_slug', 'roles', ['slug'], unique=True)
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-    pass
+    op.drop_index('ix_roles_slug', table_name='roles')
+    op.drop_table('roles')

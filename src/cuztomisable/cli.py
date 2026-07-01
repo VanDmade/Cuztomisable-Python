@@ -18,9 +18,13 @@ def _alembic_config(database_url: str) -> Config:
 
 @app.command()
 def init(
-    database_url: str = typer.Option(..., "--database-url", "-d", help="Database connection URL"),
+    database_url: str = typer.Option(
+        ...,
+        "--database-url",
+        "-d",
+        help="Database connection URL"
+    ),
 ):
-    """Apply all cuztomisable migrations to the target database."""
     cfg = _alembic_config(database_url)
     command.upgrade(cfg, "head")
     typer.echo("Cuztomisable initialized successfully.")
@@ -28,10 +32,19 @@ def init(
 
 @app.command()
 def create_migration(
-    database_url: str = typer.Option(..., "--database-url", "-d", help="Database connection URL"),
-    message: str = typer.Option(..., "--message", "-m", help="Migration message"),
+    database_url: str = typer.Option(
+        ...,
+        "--database-url",
+        "-d",
+        help="Database connection URL"
+    ),
+    message: str = typer.Option(
+        ...,
+        "--message",
+        "-m",
+        help="Migration message"
+    ),
 ):
-    """Generate a new migration by comparing models against the database."""
     cfg = _alembic_config(database_url)
     command.revision(cfg, message=message, autogenerate=True)
     typer.echo("Migration created.")
@@ -39,10 +52,17 @@ def create_migration(
 
 @app.command()
 def downgrade(
-    database_url: str = typer.Option(..., "--database-url", "-d", help="Database connection URL"),
-    revision: str = typer.Argument(default="-1", help="Target revision (default: one step back)"),
+    database_url: str = typer.Option(
+        ...,
+        "--database-url",
+        "-d",
+        help="Database connection URL"
+    ),
+    revision: str = typer.Argument(
+        default="-1",
+        help="Target revision (default: one step back)"
+    ),
 ):
-    """Roll back migrations."""
     cfg = _alembic_config(database_url)
     command.downgrade(cfg, revision)
     typer.echo(f"Downgraded to {revision}.")

@@ -19,10 +19,21 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Upgrade schema."""
-    pass
+    op.create_table('email_logs',
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_by', sa.Uuid(), nullable=True),
+        sa.Column('to', sa.Text(), nullable=True),
+        sa.Column('cc', sa.Text(), nullable=True),
+        sa.Column('bcc', sa.Text(), nullable=True),
+        sa.Column('from', sa.String(length=128), nullable=True),
+        sa.Column('subject', sa.String(length=512), nullable=True),
+        sa.Column('parameters', sa.Text(), nullable=True),
+        sa.ForeignKeyConstraint(['created_by'], ['users.id'], ondelete='SET NULL'),
+        sa.PrimaryKeyConstraint('id'),
+    )
 
 
 def downgrade() -> None:
-    """Downgrade schema."""
-    pass
+    op.drop_table('email_logs')

@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import CuztomisableConfig
+from .db import events  # noqa: F401 — registers SQLAlchemy audit field listeners
+from .middleware.ensure_valid_mobile_agent import EnsureValidMobileAgent
+from .middleware.set_locale import SetLocale
 
 
 class Cuztomisable:
@@ -24,3 +27,5 @@ class Cuztomisable:
             allow_methods=self.config.cors_allow_methods,
             allow_headers=self.config.cors_allow_headers,
         )
+        app.add_middleware(EnsureValidMobileAgent)
+        app.add_middleware(SetLocale)
