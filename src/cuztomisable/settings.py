@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 
 class CuztomisableSettings(BaseSettings):
+    app_domain: str = "localhost"
+
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30

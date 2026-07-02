@@ -3,6 +3,8 @@ from pathlib import Path
 import typer
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 app = typer.Typer(help="Cuztomisable — user management initializer for FastAPI.")
 
@@ -66,3 +68,23 @@ def downgrade(
     cfg = _alembic_config(database_url)
     command.downgrade(cfg, revision)
     typer.echo(f"Downgraded to {revision}.")
+
+
+@app.command()
+def seed(
+    database_url: str = typer.Option(
+        ...,
+        "--database-url",
+        "-d",
+        help="Database connection URL"
+    ),
+):
+    from cuztomisable.db.seeders import seed_system_user
+
+    engine = create_engine(database_url)
+    Session = sessionmaker(bind=engine)
+
+    with Session() as db:
+        seed_system_user(db)
+
+    typer.echo("Seeded successfully.")
