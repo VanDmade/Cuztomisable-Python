@@ -5,6 +5,7 @@ from .config import CuztomisableConfig
 from .db import events  # noqa: F401 — registers SQLAlchemy audit field listeners
 from .middleware.ensure_valid_mobile_agent import EnsureValidMobileAgent
 from .middleware.set_locale import SetLocale
+from .routers import routers
 
 
 class Cuztomisable:
@@ -29,3 +30,6 @@ class Cuztomisable:
         )
         app.add_middleware(EnsureValidMobileAgent)
         app.add_middleware(SetLocale)
+
+        for router in routers:
+            app.include_router(router)
