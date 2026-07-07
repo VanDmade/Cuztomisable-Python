@@ -1,0 +1,29 @@
+from fastapi import APIRouter
+
+from cuztomisable.schemas.settings import (
+    LoginSettingsResponse,
+    PublicSettingsResponse,
+    RegistrationSettingsResponse,
+)
+from cuztomisable.settings import settings
+
+router = APIRouter(tags=["Settings"])
+
+
+@router.get("/cuztomisable/settings", response_model=PublicSettingsResponse)
+def get_settings():
+    return PublicSettingsResponse(
+        login=LoginSettingsResponse(
+            with_email=settings.login["with"]["email"],
+            with_phone=settings.login["with"]["phone"],
+            remember=settings.login["remember"],
+        ),
+        registration=RegistrationSettingsResponse(
+            require_username=settings.registration["require_username"],
+            require_phone=settings.registration["require_phone"],
+        ),
+        password_requirements=settings.password_requirements,
+        country_codes=settings.country_codes,
+        default_country_code=settings.default_country_code,
+        default_language=settings.default_language,
+    )

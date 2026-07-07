@@ -1,6 +1,9 @@
 import uuid
+from typing import Optional
 
 from sqlalchemy.orm import Session
+
+from cuztomisable.db.models.users.registration import UserRegistration
 
 
 class UserRegistrationService:
@@ -12,6 +15,9 @@ class UserRegistrationService:
 
     def get_by_token(self, token: str):
         pass
+
+    def get_by_code(self, code: str) -> Optional[UserRegistration]:
+        return self.db.query(UserRegistration).filter(UserRegistration.code == code).first()
 
     def create(self, data: dict):
         pass

@@ -14,7 +14,7 @@ from cuztomisable.settings import settings
 
 _SessionLocal = None
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login")
 
 
 def configure_db(session_local) -> None:

@@ -9,13 +9,38 @@ class CuztomisableSettings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 30
 
+    login: dict = {
+        "with": {
+            "email": True,
+            "phone": False,
+        },
+        "remember": False,
+    }
+
+    registration: dict = {
+        "require_username": False,
+        "require_phone": False,
+    }
+
+    password_requirements: dict = {
+        "min_length": 6,
+        "max_length": None,
+        "uppercase": 1,
+        "digits": 1,
+        "special": 1,
+    }
+    # Password reuse prevention: number of previous passwords to check against
+    reuse_password_after: int = 3
+
     default_language: str = "en"
     default_country_code: int = 1
 
-    mobile_agent_enabled: bool = True
-    mobile_agent_log_invalid: bool = False
-    mobile_agent_platforms: list[str] = ["Android", "iOS", "Other"]
-    mobile_agent_apps: list[dict] = []
+    mobile: dict = {
+        "enabled": True,
+        "log_invalid": False,
+        "platforms": ["Android", "iOS", "Other"],
+        "apps": [],
+    }
 
     country_codes: list[dict] = [
         {"value": 1, "label": "United States / Canada", "required_length": 10},

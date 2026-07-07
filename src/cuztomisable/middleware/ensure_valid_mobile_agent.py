@@ -20,12 +20,12 @@ class EnsureValidMobileAgent(BaseHTTPMiddleware):
         user_agent = request.headers.get("User-Agent", "")
         is_mobile = request.headers.get("X-App-Platform") == "mobile"
 
-        if not is_mobile or not settings.mobile_agent_enabled:
+        if not is_mobile or not settings.mobile["enabled"]:
             return await call_next(request)
 
-        platform_pattern = "|".join(re.escape(p) for p in settings.mobile_agent_platforms)
+        platform_pattern = "|".join(re.escape(p) for p in settings.mobile["platforms"])
 
-        for app in settings.mobile_agent_apps:
+        for app in settings.mobile["apps"]:
             app_name = app.get("name", "") if isinstance(app, dict) else str(app)
             if not app_name:
                 continue
@@ -50,11 +50,11 @@ class EnsureValidMobileAgent(BaseHTTPMiddleware):
 
                 return await call_next(request)
 
-        if settings.mobile_agent_apps:
-            if settings.mobile_agent_log_invalid:
+        if settings.mobile["apps"]:
+            if settings.mobile["log_invalid"]:
                 logger.warning(
                     "Invalid mobile user agent",
-                    extra={"user_agent": user_agent, "apps": settings.mobile_agent_apps},
+                    extra={"user_agent": user_agent, "apps": settings.mobile["apps"]},
                 )
 
             return JSONResponse(

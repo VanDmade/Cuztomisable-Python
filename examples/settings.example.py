@@ -32,25 +32,50 @@ configure(
     # env: CUZTOMISABLE_DEFAULT_COUNTRY_CODE
     default_country_code=1,
 
+    # Login behavior
+    # env: CUZTOMISABLE_LOGIN (JSON object)
+    login={
+        "with": {"email": True, "phone": False},
+        "remember": False,
+    },
+
+    # Which fields registration requires
+    # env: CUZTOMISABLE_REGISTRATION (JSON object)
+    registration={
+        "require_username": False,
+        "require_phone": False,
+    },
+
+    # Password strength rules, enforced server-side regardless of max_length —
+    # bcrypt itself hard-caps input at 72 bytes.
+    # env: CUZTOMISABLE_PASSWORD_REQUIREMENTS (JSON object)
+    password_requirements={
+        "min_length": 6,
+        "max_length": None,
+        "uppercase": 1,
+        "digits": 1,
+        "special": 1,
+    },
+
+    # Number of previous passwords to check against on password change/reset
+    # env: CUZTOMISABLE_REUSE_PASSWORD_AFTER
+    reuse_password_after=3,
+
     # Mobile agent validation
-    # env: CUZTOMISABLE_MOBILE_AGENT_ENABLED
-    mobile_agent_enabled=True,
-
-    # env: CUZTOMISABLE_MOBILE_AGENT_LOG_INVALID
-    mobile_agent_log_invalid=True,
-
-    # Allowed platforms in the User-Agent string
-    # env: CUZTOMISABLE_MOBILE_AGENT_PLATFORMS (JSON array)
-    mobile_agent_platforms=["Android", "iOS"],
-
-    # Each app entry is matched against the User-Agent.
-    # Pattern: "AppName/vX.Y.Z (Platform)"
-    # min_version triggers a 426 Upgrade Required if the client is below it.
-    # env: CUZTOMISABLE_MOBILE_AGENT_APPS (JSON array)
-    mobile_agent_apps=[
-        {"name": "MyApp", "min_version": "2.0.0"},
-        {"name": "MyApp-Beta", "min_version": "1.0.0"},
-    ],
+    # env: CUZTOMISABLE_MOBILE (JSON object)
+    mobile={
+        "enabled": True,
+        "log_invalid": True,
+        # Allowed platforms in the User-Agent string
+        "platforms": ["Android", "iOS"],
+        # Each app entry is matched against the User-Agent.
+        # Pattern: "AppName/vX.Y.Z (Platform)"
+        # min_version triggers a 426 Upgrade Required if the client is below it.
+        "apps": [
+            {"name": "MyApp", "min_version": "2.0.0"},
+            {"name": "MyApp-Beta", "min_version": "1.0.0"},
+        ],
+    },
 )
 
 app = FastAPI()
