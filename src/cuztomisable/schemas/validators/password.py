@@ -13,7 +13,7 @@ class PasswordMixin(BaseModel):
     @classmethod
     def validate_password(cls, password):
         if password is None:
-            return PasswordMixin
+            return password
         # Validate password against the requirements defined in settings
         if requirements := getattr(
             settings,

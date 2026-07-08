@@ -1,5 +1,5 @@
+from .message import MessageResponse
 from .images import ImageCreate, ImageResponse
-from .phone import PhoneCreate, PhoneUpdate, PhoneResponse
 from .address import AddressCreate, AddressUpdate, AddressResponse
 from .permission import PermissionCreate, PermissionUpdate, PermissionResponse
 from .users import (
@@ -17,11 +17,9 @@ from .roles import RoleCreate, RoleUpdate, RoleResponse, RolePermissionCreate, R
 from .logs import UserLogCreate, UserLogResponse, EmailLogCreate, EmailLogResponse, TextLogCreate, TextLogResponse, ErrorLogCreate, ErrorLogResponse
 
 __all__ = [
+    "MessageResponse",
     "ImageCreate",
     "ImageResponse",
-    "PhoneCreate",
-    "PhoneUpdate",
-    "PhoneResponse",
     "AddressCreate",
     "AddressUpdate",
     "AddressResponse",

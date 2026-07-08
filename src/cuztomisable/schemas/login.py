@@ -7,11 +7,20 @@ from cuztomisable.settings import settings
 _PHONE_STRIP_CHARS = ("/", "_", "-", "(", ")", " ")
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
+
+
 class LoginRequest(BaseModel):
     username: str
     password: str
     type: Literal["email", "phone", "username"] = "username"
     remember: Optional[bool] = None
+    timezone: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod

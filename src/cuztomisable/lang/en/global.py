@@ -15,5 +15,6 @@ translations = {
         "invalid_credentials": "Invalid email or password.",
         "invalid_or_expired_token": "Invalid or expired token.",
         "database_not_configured": "Database not configured. Call configure_db() first.",
+        "unexpected": "Something went wrong. If this keeps happening, reference code {debug_code}.",
     }
 }

@@ -20,4 +20,4 @@ class ErrorLog(TimestampMixin, Base):
     debug_code: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
     parameters: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
-    user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[user_id])
+    user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[user_id], back_populates="error_logs")

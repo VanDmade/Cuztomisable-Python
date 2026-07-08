@@ -15,6 +15,7 @@ def get_settings():
     return PublicSettingsResponse(
         login=LoginSettingsResponse(
             with_email=settings.login["with"]["email"],
+            with_username=settings.login["with"]["username"],
             with_phone=settings.login["with"]["phone"],
             remember=settings.login["remember"],
         ),

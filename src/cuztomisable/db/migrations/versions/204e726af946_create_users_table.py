@@ -30,6 +30,9 @@ def upgrade() -> None:
         sa.Column('username', sa.String(length=128), nullable=True),
         sa.Column('email', sa.String(length=128), nullable=False),
         sa.Column('email_verified_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('phone', sa.String(length=15), nullable=True),
+        sa.Column('phone_verified_at', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('country_code', sa.Integer(), nullable=True),
         sa.Column('disable_emails', sa.Boolean(), nullable=False, server_default='false'),
         sa.Column('password', sa.String(length=64), nullable=False),
         sa.Column('timezone', sa.String(length=64), nullable=True),
@@ -47,11 +50,13 @@ def upgrade() -> None:
     )
     op.create_index('ix_users_email', 'users', ['email'], unique=True)
     op.create_index('ix_users_username', 'users', ['username'], unique=True)
+    op.create_index('ix_users_phone', 'users', ['phone'], unique=True)
     op.create_index('ix_users_token', 'users', ['token'], unique=True)
 
 
 def downgrade() -> None:
     op.drop_index('ix_users_token', table_name='users')
+    op.drop_index('ix_users_phone', table_name='users')
     op.drop_index('ix_users_username', table_name='users')
     op.drop_index('ix_users_email', table_name='users')
     op.drop_table('users')

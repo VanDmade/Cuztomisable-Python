@@ -39,8 +39,7 @@ class UserAccessTokenService:
             expires_at=expires_at
         )
         self.db.add(record)
-        self.db.commit()
-        self.db.refresh(record)
+        self.db.flush()
         return token_str, record
 
     def validate(self, token: str) -> Optional[dict]:

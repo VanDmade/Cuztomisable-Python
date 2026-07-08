@@ -16,5 +16,5 @@ class UserPermission(TimestampMixin, SoftDeleteMixin, Base):
     permission_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("permissions.id", ondelete="CASCADE"))
 
     created_by_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by])
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="user_permissions")
     permission: Mapped["Permission"] = relationship("Permission", foreign_keys=[permission_id])

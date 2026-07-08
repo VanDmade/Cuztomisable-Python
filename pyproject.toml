@@ -25,6 +25,9 @@ dependencies = [
     "psycopg2-binary>=2.9",
     "python-jose[cryptography]>=3.3",
     "passlib[bcrypt]>=1.7",
+    # passlib's internal bcrypt self-test is broken by bcrypt>=4.1's behavior
+    # changes; pin below that until passlib (unmaintained since 2020) is fixed.
+    "bcrypt<4.1",
 ]
 
 [project.scripts]

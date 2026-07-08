@@ -23,4 +23,4 @@ class UserPasswordReset(TimestampMixin, SoftDeleteMixin, Base):
     used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_by_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by])
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="password_resets")

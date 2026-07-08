@@ -18,4 +18,4 @@ class UserAccessToken(TimestampMixin, Base):
     used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="access_tokens")

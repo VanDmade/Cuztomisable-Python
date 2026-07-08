@@ -34,7 +34,6 @@ def upgrade() -> None:
         sa.Column('used_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('sent_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('expires_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('attempt_counter', sa.Integer(), nullable=False, server_default='0'),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['created_by'], ['users.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['deleted_by'], ['users.id'], ondelete='SET NULL'),

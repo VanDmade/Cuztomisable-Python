@@ -18,7 +18,7 @@ Run this once when setting up a new project:
 cuztomisable init --database-url "postgresql://{username}:{password}@{host}/{database}"
 ```
 
-This runs every Cuztomisable migration against your database (users, roles/permissions, images, addresses, phones, registrations, codes, passwords, tokens, and logs).
+This runs every Cuztomisable migration against your database (users, roles/permissions, images, addresses, registrations, codes, passwords, tokens, and logs). Phone number is a single `phone`/`country_code` column pair directly on `users` — there's no separate phones table.
 
 ### 2. Integrate with your FastAPI app
 

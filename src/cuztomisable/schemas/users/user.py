@@ -36,4 +36,11 @@ class UserUpdate(BaseModel):
 
 
 class UserResponse(BaseModel):
-    pass
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    email: EmailStr
+    username: Optional[str] = None
+    phone: Optional[str] = None
+    timezone: Optional[str] = None

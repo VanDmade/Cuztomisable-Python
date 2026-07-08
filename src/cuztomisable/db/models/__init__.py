@@ -1,5 +1,4 @@
 from .image import Image
-from .phone import Phone
 from .address import Address
 from .permission import Permission
 from .users import (
@@ -18,7 +17,6 @@ from .roles import Role, RolePermission
 
 __all__ = [
     "Image",
-    "Phone",
     "Address",
     "Permission",
     "User",

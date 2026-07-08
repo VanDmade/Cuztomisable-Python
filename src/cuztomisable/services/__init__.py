@@ -1,5 +1,4 @@
 from .images import ImageService
-from .phones import PhoneService
 from .addresses import AddressService
 from .permissions import PermissionService
 from .users import (
@@ -18,7 +17,6 @@ from .logs import UserLogService, EmailLogService, TextLogService, ErrorLogServi
 
 __all__ = [
     "ImageService",
-    "PhoneService",
     "AddressService",
     "PermissionService",
     "UserService",

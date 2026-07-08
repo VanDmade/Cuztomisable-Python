@@ -9,13 +9,13 @@ from cuztomisable.db.base import Base, SoftDeleteMixin, TimestampMixin
 
 if TYPE_CHECKING:
     from cuztomisable.db.models.image import Image
-    from cuztomisable.db.models.phone import Phone
     from cuztomisable.db.models.address import Address
     from cuztomisable.db.models.permission import Permission
     from cuztomisable.db.models.roles.role import Role
     from cuztomisable.db.models.users.permission import UserPermission
     from cuztomisable.db.models.users.ip_address import UserIpAddress
     from cuztomisable.db.models.users.code import UserCode
+    from cuztomisable.db.models.users.verification import UserVerification
     from cuztomisable.db.models.users.registration import UserRegistration
     from cuztomisable.db.models.users.passwords.password import UserPassword
     from cuztomisable.db.models.users.passwords.reset import UserPasswordReset
@@ -36,6 +36,9 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     username: Mapped[Optional[str]] = mapped_column(String(128), unique=True, index=True, nullable=True)
     email: Mapped[str] = mapped_column(String(128), unique=True, index=True)
     email_verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(15), unique=True, index=True, nullable=True)
+    phone_verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    country_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     disable_emails: Mapped[bool] = mapped_column(Boolean, default=False)
     password: Mapped[str] = mapped_column(String(64))
     timezone: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
@@ -51,16 +54,22 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     image: Mapped[Optional["Image"]] = relationship("Image", foreign_keys=[image_id], post_update=True)
     images: Mapped[List["Image"]] = relationship("Image", foreign_keys="Image.user_id", back_populates="user", cascade="all, delete-orphan")
     role: Mapped[Optional["Role"]] = relationship("Role", foreign_keys=[role_id])
-    user_permissions: Mapped[List["UserPermission"]] = relationship("UserPermission", foreign_keys="UserPermission.user_id", cascade="all, delete-orphan")
-    permissions: Mapped[List["Permission"]] = relationship("Permission", secondary="user_permissions", viewonly=True)
-    phones: Mapped[List["Phone"]] = relationship("Phone", foreign_keys="Phone.user_id", cascade="all, delete-orphan")
-    addresses: Mapped[List["Address"]] = relationship("Address", foreign_keys="Address.user_id", cascade="all, delete-orphan")
-    ip_addresses: Mapped[List["UserIpAddress"]] = relationship("UserIpAddress", foreign_keys="UserIpAddress.user_id", cascade="all, delete-orphan")
-    codes: Mapped[List["UserCode"]] = relationship("UserCode", foreign_keys="UserCode.user_id", cascade="all, delete-orphan")
-    registrations: Mapped[List["UserRegistration"]] = relationship("UserRegistration", foreign_keys="UserRegistration.user_id", cascade="all, delete-orphan")
-    passwords: Mapped[List["UserPassword"]] = relationship("UserPassword", foreign_keys="UserPassword.user_id", cascade="all, delete-orphan")
-    password_resets: Mapped[List["UserPasswordReset"]] = relationship("UserPasswordReset", foreign_keys="UserPasswordReset.user_id", cascade="all, delete-orphan")
-    access_tokens: Mapped[List["UserAccessToken"]] = relationship("UserAccessToken", foreign_keys="UserAccessToken.user_id", cascade="all, delete-orphan")
-    refresh_tokens: Mapped[List["UserRefreshToken"]] = relationship("UserRefreshToken", foreign_keys="UserRefreshToken.user_id", cascade="all, delete-orphan")
-    user_logs: Mapped[List["UserLog"]] = relationship("UserLog", foreign_keys="UserLog.user_id", cascade="all, delete-orphan")
-    error_logs: Mapped[List["ErrorLog"]] = relationship("ErrorLog", foreign_keys="ErrorLog.user_id")
+    user_permissions: Mapped[List["UserPermission"]] = relationship("UserPermission", foreign_keys="UserPermission.user_id", back_populates="user", cascade="all, delete-orphan")
+    permissions: Mapped[List["Permission"]] = relationship(
+        "Permission",
+        secondary="user_permissions",
+        primaryjoin="User.id == UserPermission.user_id",
+        secondaryjoin="Permission.id == UserPermission.permission_id",
+        viewonly=True,
+    )
+    addresses: Mapped[List["Address"]] = relationship("Address", foreign_keys="Address.user_id", back_populates="user", cascade="all, delete-orphan")
+    ip_addresses: Mapped[List["UserIpAddress"]] = relationship("UserIpAddress", foreign_keys="UserIpAddress.user_id", back_populates="user", cascade="all, delete-orphan")
+    codes: Mapped[List["UserCode"]] = relationship("UserCode", foreign_keys="UserCode.user_id", back_populates="user", cascade="all, delete-orphan")
+    verifications: Mapped[List["UserVerification"]] = relationship("UserVerification", foreign_keys="UserVerification.user_id", back_populates="user", cascade="all, delete-orphan")
+    registrations: Mapped[List["UserRegistration"]] = relationship("UserRegistration", foreign_keys="UserRegistration.user_id", back_populates="user", cascade="all, delete-orphan")
+    passwords: Mapped[List["UserPassword"]] = relationship("UserPassword", foreign_keys="UserPassword.user_id", back_populates="user", cascade="all, delete-orphan")
+    password_resets: Mapped[List["UserPasswordReset"]] = relationship("UserPasswordReset", foreign_keys="UserPasswordReset.user_id", back_populates="user", cascade="all, delete-orphan")
+    access_tokens: Mapped[List["UserAccessToken"]] = relationship("UserAccessToken", foreign_keys="UserAccessToken.user_id", back_populates="user", cascade="all, delete-orphan")
+    refresh_tokens: Mapped[List["UserRefreshToken"]] = relationship("UserRefreshToken", foreign_keys="UserRefreshToken.user_id", back_populates="user", cascade="all, delete-orphan")
+    user_logs: Mapped[List["UserLog"]] = relationship("UserLog", foreign_keys="UserLog.user_id", back_populates="user", cascade="all, delete-orphan")
+    error_logs: Mapped[List["ErrorLog"]] = relationship("ErrorLog", foreign_keys="ErrorLog.user_id", back_populates="user")

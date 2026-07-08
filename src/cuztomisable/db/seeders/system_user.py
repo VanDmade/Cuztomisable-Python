@@ -1,14 +1,12 @@
 import uuid
 
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.user import User
+from cuztomisable.security import hash_password
 from cuztomisable.settings import settings
 
 SYSTEM_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def seed_system_user(db: Session) -> None:
@@ -21,7 +19,7 @@ def seed_system_user(db: Session) -> None:
         id=SYSTEM_USER_ID,
         name="System",
         email=f"system@{settings.app_domain}",
-        password=_pwd_context.hash("password"),
+        password=hash_password("password"),
         admin=True,
         locked=False,
         change_password=True

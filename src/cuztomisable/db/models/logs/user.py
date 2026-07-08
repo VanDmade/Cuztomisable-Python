@@ -18,4 +18,4 @@ class UserLog(TimestampMixin, Base):
     parameters: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
     created_by_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by])
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="user_logs")

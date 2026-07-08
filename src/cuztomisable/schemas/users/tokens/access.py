@@ -4,8 +4,10 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from cuztomisable.schemas.message import MessageResponse
 
-class TokenResponse(BaseModel):
+
+class TokenResponse(MessageResponse):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"

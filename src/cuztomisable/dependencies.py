@@ -22,12 +22,26 @@ def configure_db(session_local) -> None:
     _SessionLocal = session_local
 
 
+def get_session() -> Session:
+    """
+    Returns a new Session outside FastAPI's dependency-injection system —
+    for contexts like exception handlers that don't have access to
+    per-request Depends(). Caller is responsible for closing it.
+    """
+    if _SessionLocal is None:
+        raise RuntimeError(trans("global.errors.database_not_configured"))
+    return _SessionLocal()
+
+
 def get_db() -> Generator[Session, None, None]:
     if _SessionLocal is None:
         raise RuntimeError(trans("global.errors.database_not_configured"))
     db = _SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
@@ -60,7 +74,7 @@ def get_current_user(
     )
     if not record:
         raise unauthorized
-    user = db.query(User).filter(User.id == uuid.UUID(user_id)).first()
+    user = db.query(User).filter(User.id == uuid.UUID(user_id), User.deleted_at.is_(None)).first()
     if not user or user.locked:
         raise unauthorized
     current_user_id.set(user.id)

@@ -22,5 +22,5 @@ class UserCode(TimestampMixin, SoftDeleteMixin, Base):
     sent_via: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)
     attempt_counter: Mapped[int] = mapped_column(Integer, default=0)
 
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="codes")
     user_ip_address: Mapped[Optional["UserIpAddress"]] = relationship("UserIpAddress", foreign_keys=[user_ip_address_id])

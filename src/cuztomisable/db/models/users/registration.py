@@ -21,7 +21,6 @@ class UserRegistration(TimestampMixin, SoftDeleteMixin, Base):
     used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    attempt_counter: Mapped[int] = mapped_column(Integer, default=0)
 
     created_by_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by])
-    user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[user_id])
+    user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[user_id], back_populates="registrations")

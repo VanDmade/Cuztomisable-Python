@@ -23,8 +23,7 @@ class UserRefreshTokenService:
             expires_at=expires_at
         )
         self.db.add(record)
-        self.db.commit()
-        self.db.refresh(record)
+        self.db.flush()
         return record
 
     def validate(self, token: str) -> Optional[UserRefreshToken]:

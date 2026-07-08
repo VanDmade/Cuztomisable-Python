@@ -16,4 +16,4 @@ class UserPassword(TimestampMixin, Base):
     password: Mapped[str] = mapped_column(String(64))
 
     created_by_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by])
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="passwords")

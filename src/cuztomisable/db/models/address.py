@@ -25,4 +25,4 @@ class Address(TimestampMixin, SoftDeleteMixin, Base):
     billing: Mapped[bool] = mapped_column(Boolean, default=False)
 
     created_by_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by])
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="addresses")
