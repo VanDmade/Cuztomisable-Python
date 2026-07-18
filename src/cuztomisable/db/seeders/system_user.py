@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.user import User
-from cuztomisable.security import hash_password
+from cuztomisable.helpers.security import hash_password
 from cuztomisable.settings import settings
 
 SYSTEM_USER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")

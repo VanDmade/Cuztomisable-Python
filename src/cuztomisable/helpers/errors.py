@@ -21,7 +21,7 @@ def report_error(
     debug_code = f"{secrets.randbelow(10**8):08d}"
 
     ErrorLogService(db).create({
-        "user_id": current_user_id.get(),
+        "user_id": current_user_id.get() if current_user_id.get() is not None else None,
         "message": message or str(exc),
         "file": origin.filename if origin else None,
         "line": origin.lineno if origin else None,

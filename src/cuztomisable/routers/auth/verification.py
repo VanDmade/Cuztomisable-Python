@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from cuztomisable.dependencies import get_db
+from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
 from cuztomisable.schemas.message import MessageResponse
 from cuztomisable.services.users.user import UserService
@@ -22,6 +22,8 @@ def verify(token: str, value: str, db: Session = Depends(get_db)):
                 user.email_verified_at = datetime.now(timezone.utc)
             else:
                 user.phone_verified_at = datetime.now(timezone.utc)
+            # Single-use — free the token up for other purposes once verified.
+            user.token = None
         db.commit()
     # To prevent any issues with the user clicking the link multiple times
     # or someone else trying to use the same token, we will always return

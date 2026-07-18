@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.passwords.password import UserPassword
-from cuztomisable.security import verify_password
+from cuztomisable.helpers.security import verify_password
 from cuztomisable.settings import settings
 
 

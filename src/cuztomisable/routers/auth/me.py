@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from cuztomisable.db.models.users.user import User
-from cuztomisable.dependencies import get_current_user
+from cuztomisable.helpers.dependencies import get_current_user
 from cuztomisable.schemas.users.user import UserResponse
 
 router = APIRouter(tags=["Login"])

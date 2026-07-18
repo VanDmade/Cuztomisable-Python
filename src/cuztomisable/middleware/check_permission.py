@@ -1,11 +1,12 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.permission import Permission
 from cuztomisable.db.models.roles.role_permission import RolePermission
 from cuztomisable.db.models.users.permission import UserPermission
 from cuztomisable.db.models.users.user import User
-from cuztomisable.dependencies import get_current_user, get_db
+from cuztomisable.exceptions import CuztomisableException
+from cuztomisable.helpers.dependencies import get_current_user, get_db
 from cuztomisable.lang import trans
 
 
@@ -65,7 +66,12 @@ def require_permission(permissions: str):
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
     ) -> User:
-        forbidden = HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=trans("global.errors.unauthorized"))
+        forbidden = CuztomisableException(
+            code=status.HTTP_403_FORBIDDEN,
+            detail=trans("global.errors.unauthorized"),
+            exception="HTTPException",
+            key="forbidden",
+        )
 
         if "|" in permissions:
             perms = [p.strip() for p in permissions.split("|") if p.strip()]

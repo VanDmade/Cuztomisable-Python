@@ -15,7 +15,7 @@ class UserIpAddress(TimestampMixin, SoftDeleteMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     ip_address: Mapped[str] = mapped_column(String(15))
     label: Mapped[Optional[str]] = mapped_column(String(), nullable=True)
-    fingerprint: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    fingerprint: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     last_used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     remember: Mapped[bool] = mapped_column(Boolean, default=False)
     remember_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from cuztomisable.db.models.users.permission import UserPermission
     from cuztomisable.db.models.users.ip_address import UserIpAddress
     from cuztomisable.db.models.users.code import UserCode
-    from cuztomisable.db.models.users.verification import UserVerification
     from cuztomisable.db.models.users.registration import UserRegistration
     from cuztomisable.db.models.users.passwords.password import UserPassword
     from cuztomisable.db.models.users.passwords.reset import UserPasswordReset
@@ -65,7 +64,6 @@ class User(TimestampMixin, SoftDeleteMixin, Base):
     addresses: Mapped[List["Address"]] = relationship("Address", foreign_keys="Address.user_id", back_populates="user", cascade="all, delete-orphan")
     ip_addresses: Mapped[List["UserIpAddress"]] = relationship("UserIpAddress", foreign_keys="UserIpAddress.user_id", back_populates="user", cascade="all, delete-orphan")
     codes: Mapped[List["UserCode"]] = relationship("UserCode", foreign_keys="UserCode.user_id", back_populates="user", cascade="all, delete-orphan")
-    verifications: Mapped[List["UserVerification"]] = relationship("UserVerification", foreign_keys="UserVerification.user_id", back_populates="user", cascade="all, delete-orphan")
     registrations: Mapped[List["UserRegistration"]] = relationship("UserRegistration", foreign_keys="UserRegistration.user_id", back_populates="user", cascade="all, delete-orphan")
     passwords: Mapped[List["UserPassword"]] = relationship("UserPassword", foreign_keys="UserPassword.user_id", back_populates="user", cascade="all, delete-orphan")
     password_resets: Mapped[List["UserPasswordReset"]] = relationship("UserPasswordReset", foreign_keys="UserPasswordReset.user_id", back_populates="user", cascade="all, delete-orphan")

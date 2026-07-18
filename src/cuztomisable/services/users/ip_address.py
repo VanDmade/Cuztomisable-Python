@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import Request
+from httpx import request
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.ip_address import UserIpAddress
@@ -23,8 +24,24 @@ class UserIpAddressService:
     def get_by_user(self, user_id: uuid.UUID):
         pass
 
+    def find_by_ip(self, user_id: uuid.UUID, request: Request) -> Optional[UserIpAddress]:
+        ip_address = self.ip(request)
+        if not ip_address:
+            return None
+        return (
+            self.db.query(UserIpAddress)
+            .filter_by(user_id=user_id, ip_address=ip_address)
+            .first()
+        )
+    
+    def find_or_create(self, user_id: uuid.UUID, request: Request) -> Optional[UserIpAddress]:
+        record = self.find_by_ip(user_id, request)
+        if not record:
+            record = self.create(user_id, request)
+        return record
+
     def create(self, user_id: uuid.UUID, request: Request) -> Optional[UserIpAddress]:
-        ip_address = request.client.host if request.client else None
+        ip_address = self.ip(request)
         if not ip_address:
             return None
         record = UserIpAddress(
@@ -39,3 +56,6 @@ class UserIpAddressService:
 
     def delete(self, ip_address_id: uuid.UUID):
         pass
+
+    def ip(self, request: Request) -> Optional[str]:
+        return request.client.host if request.client else None

@@ -28,10 +28,15 @@ class CuztomisableSettings(BaseSettings):
             "web": False,
             "mobile": False,
         },
+        "unique_phone": True,
         # Logs the user in automatically after registration, if verification is not required
         "login_after_registration": True,
         "require_username": False,
         "require_phone": False,
+    }
+
+    forgot: dict = {
+        "time_between_allowed_resets": 300, # seconds
     }
 
     password_requirements: dict = {
@@ -59,6 +64,29 @@ class CuztomisableSettings(BaseSettings):
         {"value": 44, "label": "UK", "name": "United Kingdom", "required_length": 10},
     ]
     model_config = {"env_prefix": "CUZTOMISABLE_"}
+
+    errors: dict = {
+        "debug_code": {
+            "length": 8,
+            "characters": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        },
+        # Leave this list empty to log all errors, or specify a list of HTTP status codes to log only those errors.
+        "log_codes": [500, 501, 502, 503, 504],
+    }
+
+    def __call__(self, key: str, default=None):
+        """Dotted-path lookup, e.g. settings("registration.unique_phone", False)."""
+        current = self
+        for part in key.split("."):
+            if isinstance(current, dict):
+                if part not in current:
+                    return default
+                current = current[part]
+            elif hasattr(current, part):
+                current = getattr(current, part)
+            else:
+                return default
+        return current
 
 
 settings = CuztomisableSettings()

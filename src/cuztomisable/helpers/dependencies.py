@@ -1,7 +1,7 @@
 import uuid
 from typing import Generator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from cuztomisable.context import current_user_id
 from cuztomisable.db.models.users.tokens.access import UserAccessToken
 from cuztomisable.db.models.users.user import User
+from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.lang import trans
 from cuztomisable.settings import settings
 
@@ -50,9 +51,11 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> User:
-    unauthorized = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+    unauthorized = CuztomisableException(
+        code=status.HTTP_401_UNAUTHORIZED,
         detail=trans("global.errors.invalid_or_expired_token"),
+        exception="HTTPException",
+        key="invalid_or_expired_token",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:

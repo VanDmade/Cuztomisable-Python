@@ -108,7 +108,7 @@ class UserAccessTokenService:
                 )
                 .update({"revoked": True})
         )
-        self.db.commit()
+        self.db.flush()
 
     def delete(self, token_id: uuid.UUID) -> bool:
         record = (

@@ -33,4 +33,9 @@ class UserCodeService:
         return record
 
     def delete(self, code_id: uuid.UUID):
-        pass
+        self.db.query(UserCode).filter(UserCode.id == code_id).delete()
+        self.db.flush()
+
+    def delete_all_by_user(self, user_id: uuid.UUID):
+        self.db.query(UserCode).filter(UserCode.user_id == user_id).delete()
+        self.db.flush()

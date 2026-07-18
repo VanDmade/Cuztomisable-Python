@@ -4,7 +4,8 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.user import User
-from cuztomisable.security import hash_password
+from cuztomisable.helpers.security import hash_password
+from cuztomisable.helpers import generate_token
 
 
 class UserService:
@@ -26,6 +27,7 @@ class UserService:
     def create(self, data: dict) -> User:
         data = dict(data)
         data["password"] = hash_password(data["password"])
+        data["token"] = generate_token()
         user = User(**data)
         self.db.add(user)
         self.db.flush()
