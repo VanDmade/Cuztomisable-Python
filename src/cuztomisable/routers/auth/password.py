@@ -63,7 +63,6 @@ def resend(token: str, db: Session = Depends(get_db)):
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
             detail=trans("password.errors.invalid_reset_token"),
-            exception="HTTPException",
             key="invalid_reset_token",
         )
     record.sent_at = datetime.now(timezone.utc)
@@ -83,7 +82,6 @@ def verify(
     invalid = CuztomisableException(
         code=status.HTTP_400_BAD_REQUEST,
         detail=trans("password.errors.invalid_reset_token"),
-        exception="HTTPException",
         key="invalid_reset_token",
     )
     if not record or record.used_at:
@@ -106,7 +104,6 @@ def reset(token: str, data: ResetPasswordRequest, request: Request, db: Session 
     invalid = CuztomisableException(
         code=status.HTTP_400_BAD_REQUEST,
         detail=trans("password.errors.invalid_reset_token"),
-        exception="HTTPException",
         key="invalid_reset_token",
     )
     if not record or record.used_at:
@@ -123,7 +120,6 @@ def reset(token: str, data: ResetPasswordRequest, request: Request, db: Session 
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
             detail=trans("validation.errors.password_recently_used"),
-            exception="HTTPException",
             key="password_recently_used",
         )
 

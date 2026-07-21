@@ -27,4 +27,5 @@ def get_settings():
         country_codes=settings.country_codes,
         default_country_code=settings.default_country_code,
         default_language=settings.default_language,
+        multi_factor_authentication=settings.multi_factor_authentication,
     )

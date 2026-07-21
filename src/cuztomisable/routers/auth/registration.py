@@ -39,7 +39,6 @@ def register(
         raise CuztomisableException(
             code=status.HTTP_409_CONFLICT,
             detail=trans("registration.errors.email_already_registered"),
-            exception="HTTPException",
             key="email_already_registered",
         )
     # Determines if the phone number is unique, if the setting is enabled
@@ -49,7 +48,6 @@ def register(
         raise CuztomisableException(
             code=status.HTTP_409_CONFLICT,
             detail=trans("registration.errors.phone_already_registered"),
-            exception="HTTPException",
             key="phone_already_registered",
         )
     registration_service = UserRegistrationService(db)
@@ -61,7 +59,6 @@ def register(
         invalid_code = CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
             detail=trans("registration.errors.invalid_registration_code"),
-            exception="HTTPException",
             key="invalid_registration_code",
         )
         # Code was not found
@@ -72,7 +69,6 @@ def register(
             raise CuztomisableException(
                 code=status.HTTP_400_BAD_REQUEST,
                 detail=trans("registration.errors.registration_code_already_used"),
-                exception="HTTPException",
                 key="registration_code_already_used",
             )
         # Code expired
@@ -96,6 +92,7 @@ def register(
     UserPasswordService(db).create(user.id, {"password": hash_password(data.password)})
     # Creates the IP address entry
     UserIpAddressService(db).create(user.id, request)
+    user_service.send_welcome_email(user)
     if registration:
         registration.user_id = user.id
         registration.used_at = datetime.now(timezone.utc)
@@ -106,7 +103,7 @@ def register(
         # Sends the verification code to the user
         if verify_email:
             verify_via = "email"
-            # TODO :: Send email verification code
+            user_service.send_verification_email(user)
         if verify_phone:
             verify_via += (" and " if verify_via != "" else "") + "phone"
             # TODO :: Send phone verification code

@@ -1,4 +1,10 @@
+from typing import Optional
+
 from pydantic import BaseModel, model_validator
+
+
+class UserMixin(BaseModel):
+    user: Optional[dict] = None
 
 
 class NullStringMixin(BaseModel):

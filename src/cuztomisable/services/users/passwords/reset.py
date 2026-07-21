@@ -6,6 +6,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.passwords.reset import UserPasswordReset
+from cuztomisable.services.mail import MailService
+from cuztomisable.settings import settings
 
 _RESET_EXPIRY = timedelta(hours=1)
 
@@ -58,5 +60,10 @@ class UserPasswordResetService:
         return True
 
     def send_email(self, user, record: UserPasswordReset) -> None:
-        # Placeholder for sending email logic
-        pass
+        link = f"https://{settings.app_domain}/password/reset/{record.token}"
+        MailService(self.db).send_template(
+            user.email,
+            "reset_password",
+            {"link": link, "code": record.code},
+            created_by=user.id,
+        )

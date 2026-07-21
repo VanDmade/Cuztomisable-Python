@@ -52,7 +52,7 @@ class Cuztomisable:
                 # Still print the full traceback to the console — a registered
                 # handler prevents Starlette's own unhandled-exception logging.
                 logger.exception("Unhandled exception during request")
-                cuztomisable_exception = CuztomisableException(code=500, detail=str(exc), exception=type(exc).__name__)
+                cuztomisable_exception = CuztomisableException(code=500, detail=str(exc))
 
             debug_code = "".join(random.choices(
                 settings.errors["debug_code"]["characters"],
@@ -61,42 +61,61 @@ class Cuztomisable:
             # Only server errors (>= 500) get written to the error log —
             # routine client errors (bad input, auth, not found) are just
             # noted locally.
+            log_codes = settings.errors["log_codes"]
+            should_log = not log_codes or cuztomisable_exception.status_code in log_codes
             message = (
                 trans("global.errors.unexpected", debug_code=debug_code)
                 if cuztomisable_exception.status_code >= 500
                 else cuztomisable_exception.detail
             )
-            db = get_session()
-            try:
-                debug_code = report_error(
-                    db,
-                    exc,
-                    code=cuztomisable_exception.key,
-                    message=cuztomisable_exception.detail,
-                    parameters={
-                        "path": str(request.url),
-                        "method": request.method,
-                        **getattr(request.state, "error_parameters", {}),
-                        **(cuztomisable_exception.parameters or {}),
-                    },
-                )
-            finally:
-                db.close()
+            if should_log:
+                db = get_session()
+                try:
+                    report_error(
+                        db,
+                        exc,
+                        debug_code=debug_code,
+                        code=cuztomisable_exception.key,
+                        message=cuztomisable_exception.detail,
+                        parameters={
+                            "path": str(request.url),
+                            "method": request.method,
+                            **getattr(request.state, "error_parameters", {}),
+                            **(cuztomisable_exception.parameters or {}),
+                        },
+                    )
+                finally:
+                    db.close()
+            else:
+                debug_code = None
             # Prevents issues with leaking server / database errors
             cuztomisable_exception.detail = message
             content = {
-                "code": cuztomisable_exception.status_code,
-                "detail": cuztomisable_exception.detail,
-                "exception": cuztomisable_exception.exception_type,
-                "parameters": cuztomisable_exception.parameters,
+                "message": cuztomisable_exception.detail,
+                "parameters": cuztomisable_exception.parameters or {},
             }
             if debug_code:
                 content["debug_code"] = debug_code
 
+            # This handler catches the bare Exception class, which Starlette
+            # attaches to ServerErrorMiddleware — the outermost layer, above
+            # CORSMiddleware. That means responses built here never pass
+            # through CORSMiddleware, so the CORS headers have to be added
+            # by hand or the browser blocks the frontend from reading them.
+            headers = dict(cuztomisable_exception.headers or {})
+            origin = request.headers.get("origin")
+            if self.config.cors_origins == ["*"]:
+                headers["Access-Control-Allow-Origin"] = "*"
+            elif origin and origin in self.config.cors_origins:
+                headers["Access-Control-Allow-Origin"] = origin
+                headers["Vary"] = "Origin"
+                if self.config.cors_allow_credentials:
+                    headers["Access-Control-Allow-Credentials"] = "true"
+
             return JSONResponse(
                 status_code=cuztomisable_exception.status_code,
                 content=content,
-                headers=cuztomisable_exception.headers
+                headers=headers,
             )
 
         for router in routers:

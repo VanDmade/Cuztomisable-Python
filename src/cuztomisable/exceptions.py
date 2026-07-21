@@ -14,14 +14,12 @@ class CuztomisableException(Exception):
         code: int,
         detail: str,
         key: Optional[str] = None,
-        exception: Optional[str] = "HTTPException",
         parameters: Optional[dict] = None,
         headers: Optional[dict[str, str]] = None,
     ) -> None:
         self.status_code = code
         self.detail = detail
         self.key = key
-        self.exception_type = exception
         self.parameters = parameters
         self.headers = headers
         super().__init__(detail)

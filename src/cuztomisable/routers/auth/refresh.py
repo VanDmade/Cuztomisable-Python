@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
-from cuztomisable.schemas.login import RefreshRequest
+from cuztomisable.schemas.authentication import RefreshRequest
 from cuztomisable.schemas.users.tokens.access import TokenResponse
 from cuztomisable.services.users.tokens.access import UserAccessTokenService
 from cuztomisable.services.users.tokens.refresh import UserRefreshTokenService
@@ -19,7 +19,6 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
         raise CuztomisableException(
             code=status.HTTP_401_UNAUTHORIZED,
             detail=trans("global.errors.invalid_or_expired_token"),
-            exception="HTTPException",
             key="invalid_or_expired_token",
         )
 

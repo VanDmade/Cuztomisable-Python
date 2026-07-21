@@ -1,5 +1,6 @@
 from typing import Literal, Optional
 
+from cuztomisable.schemas.message import MessageResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter, model_validator
 
 from cuztomisable.settings import settings
@@ -13,6 +14,20 @@ class RefreshRequest(BaseModel):
 
 class LogoutRequest(BaseModel):
     refresh_token: str
+
+
+class MfaChannelsResponse(MessageResponse):
+    email: Optional[str] = None
+    phone: Optional[str] = None
+
+
+class MfaSendRequest(BaseModel):
+    type: Literal["email", "sms"]
+
+
+class MfaLoginRequest(BaseModel):
+    code: str
+    remember: Optional[bool] = None
 
 
 class LoginRequest(BaseModel):
@@ -54,6 +69,6 @@ class LoginRequest(BaseModel):
             raise ValueError("password is required")
         if self.type == "email":
             TypeAdapter(EmailStr).validate_python(self.username)
-        if settings.login["remember"] and self.remember is None:
-            raise ValueError("remember is required")
+        if self.remember is None:
+            self.remember = False
         return self

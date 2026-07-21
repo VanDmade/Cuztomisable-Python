@@ -1,6 +1,7 @@
 from .images import ImageService
 from .addresses import AddressService
 from .permissions import PermissionService
+from .mail import MailService
 from .users import (
     UserService,
     UserIpAddressService,
@@ -19,6 +20,7 @@ __all__ = [
     "ImageService",
     "AddressService",
     "PermissionService",
+    "MailService",
     "UserService",
     "UserIpAddressService",
     "UserCodeService",

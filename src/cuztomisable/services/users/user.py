@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from cuztomisable.db.models.users.user import User
 from cuztomisable.helpers.security import hash_password
 from cuztomisable.helpers import generate_token
+from cuztomisable.services.mail import MailService
+from cuztomisable.settings import settings
 
 
 class UserService:
@@ -35,6 +37,23 @@ class UserService:
 
     def update(self, user_id: uuid.UUID, data: dict):
         pass
+
+    def send_verification_email(self, user: User) -> None:
+        link = f"https://{settings.app_domain}/api/{user.token}/v/{user.email}"
+        MailService(self.db).send_template(
+            user.email,
+            "email_verification",
+            {"link": link},
+            created_by=user.id,
+        )
+
+    def send_welcome_email(self, user: User) -> None:
+        MailService(self.db).send_template(
+            user.email,
+            "new_registration",
+            {"name": user.name},
+            created_by=user.id,
+        )
 
     def delete(self, user_id: uuid.UUID):
         user = self.get_by_id(user_id)

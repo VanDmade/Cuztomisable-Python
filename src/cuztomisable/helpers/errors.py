@@ -1,4 +1,3 @@
-import secrets
 import traceback
 from typing import Optional
 
@@ -12,13 +11,13 @@ def report_error(
     db: Session,
     exc: Exception,
     *,
+    debug_code: str,
     code: Optional[str] = None,
     message: Optional[str] = None,
     parameters: Optional[dict] = None,
 ) -> str:
     trace = traceback.extract_tb(exc.__traceback__)
     origin = trace[-1] if trace else None
-    debug_code = f"{secrets.randbelow(10**8):08d}"
 
     ErrorLogService(db).create({
         "user_id": current_user_id.get() if current_user_id.get() is not None else None,

@@ -5,9 +5,10 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 from cuztomisable.schemas.message import MessageResponse
+from cuztomisable.schemas.mixins import UserMixin
 
 
-class TokenResponse(MessageResponse):
+class TokenResponse(MessageResponse, UserMixin):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"

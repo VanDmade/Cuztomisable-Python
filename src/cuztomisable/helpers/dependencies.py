@@ -54,7 +54,6 @@ def get_current_user(
     unauthorized = CuztomisableException(
         code=status.HTTP_401_UNAUTHORIZED,
         detail=trans("global.errors.invalid_or_expired_token"),
-        exception="HTTPException",
         key="invalid_or_expired_token",
         headers={"WWW-Authenticate": "Bearer"},
     )

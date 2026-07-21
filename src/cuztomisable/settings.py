@@ -1,8 +1,45 @@
 from pydantic_settings import BaseSettings
 
+from cuztomisable.emails import (
+    DefaultLayout,
+    EmailVerificationEmail,
+    MfaCodeEmail,
+    NewLoginDetectedEmail,
+    NewRegistrationEmail,
+    ResetPasswordEmail,
+)
+
 
 class CuztomisableSettings(BaseSettings):
     app_domain: str = "localhost"
+
+    mail_from_address: str = "no-reply@localhost"
+    mail_from_name: str = "Cuztomisable"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_use_tls: bool = True
+
+    # "smtp" sends for real. "log" (or leaving smtp_username blank) writes the
+    # rendered email to mail_log_path instead — handy for testing without SES set up.
+    mail_driver: str = "log"
+    mail_log_path: str = "storage/emails"
+
+    email: dict = {
+        "sanitize_keys": ["password", "code", "token"],
+        "notify_on_new_ip_address": True,
+    }
+
+    # Swap any of these out via configure(email_templates={"reset_password": MyTemplate})
+    email_templates: dict = {
+        "layout": DefaultLayout,
+        "reset_password": ResetPasswordEmail,
+        "mfa_code": MfaCodeEmail,
+        "new_registration": NewRegistrationEmail,
+        "email_verification": EmailVerificationEmail,
+        "new_login": NewLoginDetectedEmail,
+    }
 
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
@@ -15,12 +52,25 @@ class CuztomisableSettings(BaseSettings):
             "phone": False,
             "username": True,
         },
-        "remember": False,
+        "attempt_timer": 300,
+        "max_attempts": 5,
+        "lock_on_max_attempts": False,
     }
 
-    verification: dict = {
-        "email": False,
-        "phone": False,
+    multi_factor_authentication: dict = {
+        "enabled": True,
+        "send_email": True,
+        "send_phone": False,
+        "code": {
+            "length": 6,
+            "characters": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "regenerate_on_resend": False,
+            "max_attempts": 5,
+        },
+        "resend_timer": 60,
+        "expires_after": 300,
+        "remember_for_days": 30,
+        "remember": False,
     }
 
     registration: dict = {

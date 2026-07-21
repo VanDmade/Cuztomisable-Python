@@ -10,5 +10,5 @@ translations = {
         "invalid_registration_code": "Invalid or expired registration code.",
         "registration_email_mismatch": "This registration code was issued for a different email address.",
         "invalid_verification_token": "Invalid or expired verification link.",
-    }
+    },
 }

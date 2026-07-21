@@ -7,6 +7,7 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.ip_address import UserIpAddress
+from cuztomisable.services.mail import MailService
 
 
 def _make_fingerprint(request: Request) -> str:
@@ -52,6 +53,18 @@ class UserIpAddressService:
         self.db.add(record)
         self.db.flush()
         return record
+
+    def send_email(self, user, record: UserIpAddress) -> None:
+        last_used_at = datetime.now(timezone.utc)
+        MailService(self.db).send_template(
+            user.email,
+            "new_login",
+            {
+                "ip_address": record.ip_address,
+                "when": last_used_at.strftime("%Y-%m-%d %H:%M UTC"),
+            },
+            created_by=user.id,
+        )
 
     def delete(self, ip_address_id: uuid.UUID):
         pass
