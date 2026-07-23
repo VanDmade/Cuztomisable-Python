@@ -1,7 +1,7 @@
 from .application import Cuztomisable
 from .db.base import Base
 from .db.models import User, Image
-from .schemas import UserCreate, UserUpdate, UserResponse, ImageCreate, ImageResponse
+from .schemas import UserCreate, UserResponse
 from .services import UserService, ImageService
 
 __all__ = [
@@ -10,10 +10,7 @@ __all__ = [
     "User",
     "Image",
     "UserCreate",
-    "UserUpdate",
     "UserResponse",
-    "ImageCreate",
-    "ImageResponse",
     "UserService",
     "ImageService",
 ]

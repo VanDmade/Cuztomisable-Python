@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.user import User
 from cuztomisable.helpers.dependencies import get_current_user, get_db
-from cuztomisable.schemas.authentication import LogoutRequest
+from cuztomisable.schemas.auth.logout import LogoutRequest
 from cuztomisable.services.users.tokens.refresh import UserRefreshTokenService
 
 router = APIRouter(tags=["Login"])

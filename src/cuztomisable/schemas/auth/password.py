@@ -1,9 +1,9 @@
 from typing import Literal
 
-from cuztomisable.helpers.identify import detect_login_type
-from cuztomisable.schemas.message import MessageResponse
 from pydantic import BaseModel, Field, model_validator
 
+from cuztomisable.helpers.identify import detect_login_type
+from cuztomisable.schemas.message import MessageResponse
 from cuztomisable.schemas.validators import PasswordMixin
 from cuztomisable.settings import settings
 

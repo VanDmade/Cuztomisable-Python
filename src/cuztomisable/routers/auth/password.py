@@ -11,7 +11,7 @@ from cuztomisable.db.models.users.passwords.reset import UserPasswordReset
 from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
-from cuztomisable.schemas.users.password import (
+from cuztomisable.schemas.auth.password import (
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     ForgotPasswordSendRequest,
@@ -19,7 +19,7 @@ from cuztomisable.schemas.users.password import (
     VerifyResetCodeQuery,
 )
 from cuztomisable.schemas.redirect import RedirectMessageResponse
-from cuztomisable.schemas.users.tokens.access import TokenResponse
+from cuztomisable.schemas.auth.tokens import TokenResponse
 from cuztomisable.helpers.security import hash_password
 from cuztomisable.services.users.auth import AuthService
 from cuztomisable.services.users.passwords.password import UserPasswordService

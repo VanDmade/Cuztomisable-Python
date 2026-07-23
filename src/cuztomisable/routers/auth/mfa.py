@@ -8,9 +8,9 @@ from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.helpers.maskers import mask_email, mask_phone
 from cuztomisable.lang import trans
-from cuztomisable.schemas.authentication import MfaChannelsResponse, MfaLoginRequest, MfaSendRequest
+from cuztomisable.schemas.auth.mfa import MfaChannelsResponse, MfaLoginRequest, MfaSendRequest
+from cuztomisable.schemas.auth.tokens import TokenResponse
 from cuztomisable.schemas.message import MessageResponse
-from cuztomisable.schemas.users.tokens.access import TokenResponse
 from cuztomisable.schemas.users.user import UserResponse
 from cuztomisable.services.users.code import UserCodeService
 from cuztomisable.services.users.tokens.access import UserAccessTokenService

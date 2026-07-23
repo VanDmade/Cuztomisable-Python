@@ -5,9 +5,9 @@ from typing import Union
 from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
-from cuztomisable.schemas.authentication import LoginRequest
+from cuztomisable.schemas.auth.login import LoginRequest
+from cuztomisable.schemas.auth.tokens import TokenResponse
 from cuztomisable.schemas.redirect import RedirectMessageResponse
-from cuztomisable.schemas.users.tokens.access import TokenResponse
 from cuztomisable.schemas.users.user import UserResponse
 from cuztomisable.helpers.security import verify_password
 from cuztomisable.services.users.auth import AuthService

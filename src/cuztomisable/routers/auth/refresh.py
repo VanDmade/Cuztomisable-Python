@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
-from cuztomisable.schemas.authentication import RefreshRequest
-from cuztomisable.schemas.users.tokens.access import TokenResponse
+from cuztomisable.schemas.auth.refresh import RefreshRequest
+from cuztomisable.schemas.auth.tokens import TokenResponse
 from cuztomisable.services.users.tokens.access import UserAccessTokenService
 from cuztomisable.services.users.tokens.refresh import UserRefreshTokenService
 

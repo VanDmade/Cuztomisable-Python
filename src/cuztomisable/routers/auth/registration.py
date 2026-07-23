@@ -10,7 +10,7 @@ from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
 from cuztomisable.helpers.security import hash_password
 from cuztomisable.schemas.message import MessageResponse
-from cuztomisable.schemas.users.tokens.access import TokenResponse
+from cuztomisable.schemas.auth.tokens import TokenResponse
 from cuztomisable.schemas.users.user import UserCreate, UserResponse
 from cuztomisable.services.users.registration import UserRegistrationService
 from cuztomisable.services.users.tokens.access import UserAccessTokenService

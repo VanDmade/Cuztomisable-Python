@@ -1,32 +1,9 @@
 from typing import Literal, Optional
 
-from cuztomisable.helpers.identify import detect_login_type
-from cuztomisable.schemas.message import MessageResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter, model_validator
 
+from cuztomisable.helpers.identify import detect_login_type
 from cuztomisable.settings import settings
-
-
-class RefreshRequest(BaseModel):
-    refresh_token: str
-
-
-class LogoutRequest(BaseModel):
-    refresh_token: str
-
-
-class MfaChannelsResponse(MessageResponse):
-    email: Optional[str] = None
-    phone: Optional[str] = None
-
-
-class MfaSendRequest(BaseModel):
-    type: Literal["email", "sms"]
-
-
-class MfaLoginRequest(BaseModel):
-    code: str
-    remember: Optional[bool] = None
 
 
 class LoginRequest(BaseModel):

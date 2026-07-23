@@ -130,6 +130,17 @@ class CuztomisableSettings(BaseSettings):
     ]
     model_config = {"env_prefix": "CUZTOMISABLE_"}
 
+    tablelify: dict = {
+        "filtered": True,
+        "page_details": True,
+        "max_size": 100,
+        "default": {
+            "size": 10,
+            "order_by": "id",
+            "order_direction": "desc",
+        },
+    }
+
     errors: dict = {
         "debug_code": {
             "length": 8,
