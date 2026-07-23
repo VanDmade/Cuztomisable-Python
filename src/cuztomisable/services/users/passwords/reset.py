@@ -3,13 +3,12 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
+from cuztomisable.helpers.security import generate_token
 from sqlalchemy.orm import Session
 
 from cuztomisable.db.models.users.passwords.reset import UserPasswordReset
 from cuztomisable.services.mail import MailService
 from cuztomisable.settings import settings
-
-_RESET_EXPIRY = timedelta(hours=1)
 
 
 class UserPasswordResetService:
@@ -32,16 +31,18 @@ class UserPasswordResetService:
                 .first()
         )
 
-    def get_by_token(self, token: str) -> Optional[UserPasswordReset]:
-        return self.db.query(UserPasswordReset).filter(UserPasswordReset.token == token).first()
+    def get_by_code(self, code: str) -> Optional[UserPasswordReset]:
+        return self.db.query(UserPasswordReset).filter(UserPasswordReset.code == code).first()
 
     def create(self, user_id: uuid.UUID) -> UserPasswordReset:
+        expires_after = settings("reset_password.expires_after", 300)
         record = UserPasswordReset(
             user_id=user_id,
-            code=secrets.token_hex(4),
-            token=secrets.token_hex(4),
-            sent_at=datetime.now(timezone.utc),
-            expires_at=datetime.now(timezone.utc) + _RESET_EXPIRY,
+            code=generate_token(
+                length=settings("reset_password.code.length", 6),
+                characters=settings("reset_password.code.characters", "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+            ),
+            expires_at=datetime.now(timezone.utc) + timedelta(seconds=expires_after),
         )
         self.db.add(record)
         self.db.flush()
@@ -60,10 +61,13 @@ class UserPasswordResetService:
         return True
 
     def send_email(self, user, record: UserPasswordReset) -> None:
-        link = f"https://{settings.app_domain}/password/reset/{record.token}"
+        link = f"https://{settings.app_domain}/password/reset/{record.code}"
         MailService(self.db).send_template(
             user.email,
             "reset_password",
             {"link": link, "code": record.code},
             created_by=user.id,
         )
+
+    def send_sms(self, user, record: UserPasswordReset) -> None:
+        pass

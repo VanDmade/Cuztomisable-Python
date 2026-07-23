@@ -68,7 +68,7 @@ def require_permission(permissions: str):
     ) -> User:
         forbidden = CuztomisableException(
             code=status.HTTP_403_FORBIDDEN,
-            detail=trans("global.errors.unauthorized"),
+            message=trans("global.errors.unauthorized"),
             key="forbidden",
         )
 

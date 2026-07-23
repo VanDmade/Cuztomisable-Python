@@ -4,7 +4,13 @@ from .code import UserCodeCreate, UserCodeResponse
 from .permission import UserPermissionCreate, UserPermissionResponse
 from .registration import UserRegistrationCreate, UserRegistrationUpdate, UserRegistrationResponse
 from .tokens import UserAccessTokenResponse, UserRefreshTokenResponse
-from .passwords import UserPasswordCreate, UserPasswordResponse, UserPasswordResetCreate, UserPasswordResetResponse
+from .password import (
+    IdentifyResetMixin,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    VerifyResetCodeQuery,
+    ResetPasswordRequest,
+)
 
 __all__ = [
     "UserCreate",
@@ -21,8 +27,9 @@ __all__ = [
     "UserRegistrationResponse",
     "UserAccessTokenResponse",
     "UserRefreshTokenResponse",
-    "UserPasswordCreate",
-    "UserPasswordResponse",
-    "UserPasswordResetCreate",
-    "UserPasswordResetResponse",
+    "IdentifyResetMixin",
+    "ForgotPasswordRequest",
+    "ForgotPasswordResponse",
+    "VerifyResetCodeQuery",
+    "ResetPasswordRequest",
 ]

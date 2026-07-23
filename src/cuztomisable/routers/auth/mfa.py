@@ -26,7 +26,7 @@ _REMEMBER_FOR = timedelta(days=settings("multi_factor_authentication.remember_fo
 def _invalid_token() -> CuztomisableException:
     return CuztomisableException(
         code=status.HTTP_400_BAD_REQUEST,
-        detail=trans("login.errors.invalid_mfa_token"),
+        message=trans("login.errors.invalid_mfa_token"),
         key="invalid_mfa_token",
         parameters={"redirect": "/login"},
     )
@@ -35,7 +35,7 @@ def _invalid_token() -> CuztomisableException:
 def _wrong_code() -> CuztomisableException:
     return CuztomisableException(
         code=status.HTTP_400_BAD_REQUEST,
-        detail=trans("login.errors.mfa_wrong_code"),
+        message=trans("login.errors.mfa_wrong_code"),
         key="mfa_wrong_code",
     )
 
@@ -58,14 +58,14 @@ def verify_token(token: str, db: Session = Depends(get_db)):
     if not email and not phone:
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
-            detail=trans("login.errors.mfa_no_channels"),
+            message=trans("login.errors.mfa_no_channels"),
             key="mfa_no_channels",
             parameters={"redirect": "/login"},
         )
     return MfaChannelsResponse(
         message=trans("login.multi_factor_authentication.channels"),
-        email=email if settings("login.with.email", True) and email else None,
-        phone=phone if settings("login.with.phone", True) and phone else None,
+        email=email if settings("multi_factor_authentication.with.email", True) and email else None,
+        phone=phone if settings("multi_factor_authentication.with.phone", True) and phone else None,
     )
 
 
@@ -77,14 +77,14 @@ def send_code(token: str, data: MfaSendRequest, db: Session = Depends(get_db)):
     if record.sent_at and record.sent_at > datetime.now(timezone.utc) - timedelta(seconds=resend_timer):
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
-            detail=trans("login.errors.code_sent_too_recently"),
+            message=trans("login.errors.code_sent_too_recently"),
             key="code_sent_too_recently",
         )
     if settings("multi_factor_authentication.code.regenerate_on_resend", False):
         record.code = UserCodeService(db).generate_code()
-    if data.type == "email" and user.email and settings("login.with.email", True):
+    if data.type == "email" and user.email and settings("multi_factor_authentication.with.email", True):
         UserCodeService(db).send_email(user, record)
-    elif data.type == "sms" and user.phone and settings("login.with.phone", True):
+    elif data.type == "sms" and user.phone and settings("multi_factor_authentication.with.phone", True):
         # TODO :: Implement SMS sending logic here
         pass
     record.sent_at = datetime.now(timezone.utc)
@@ -105,7 +105,7 @@ def verify_and_login(token: str, data: MfaLoginRequest, db: Session = Depends(ge
             db.commit()
             raise CuztomisableException(
                 code=status.HTTP_400_BAD_REQUEST,
-                detail=trans("login.errors.mfa_max_attempts_reached"),
+                message=trans("login.errors.mfa_max_attempts_reached"),
                 key="mfa_max_attempts_reached",
                 parameters={"redirect": "/login"},
             )
@@ -117,7 +117,7 @@ def verify_and_login(token: str, data: MfaLoginRequest, db: Session = Depends(ge
         db.commit()
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
-            detail=trans("login.errors.mfa_code_expired"),
+            message=trans("login.errors.mfa_code_expired"),
             key="mfa_code_expired",
             parameters={"redirect": "/login"},
         )

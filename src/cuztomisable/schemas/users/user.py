@@ -24,9 +24,9 @@ class UserCreate(PhoneMixin, PasswordMixin):
 
     @model_validator(mode='after')
     def validate_required_fields(self) -> 'UserCreate':
-        if settings.registration["require_username"] and not self.username:
+        if settings("registration.require_username", False) and not self.username:
             raise ValueError(trans("validation.errors.username_required"))
-        if settings.registration["require_phone"] and not self.phone:
+        if settings("registration.require_phone", False) and not self.phone:
             raise ValueError(trans("validation.errors.phone_required"))
         return self
 

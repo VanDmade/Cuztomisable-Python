@@ -12,15 +12,15 @@ class CuztomisableException(Exception):
     def __init__(
         self,
         code: int,
-        detail: str,
+        message: str,
         key: Optional[str] = None,
         parameters: Optional[dict] = None,
         headers: Optional[dict[str, str]] = None,
     ) -> None:
         self.status_code = code
-        self.detail = detail
+        self.message = message
         self.key = key
         self.parameters = parameters
         self.headers = headers
-        super().__init__(detail)
+        super().__init__(message)
 

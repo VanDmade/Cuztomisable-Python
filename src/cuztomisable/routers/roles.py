@@ -16,12 +16,12 @@ router = APIRouter(prefix="/roles", tags=["Roles"])
 
 _forbidden = CuztomisableException(
     code=status.HTTP_403_FORBIDDEN,
-    detail=trans("global.errors.unauthorized"),
+    message=trans("global.errors.unauthorized"),
     key="forbidden",
 )
 _not_found = CuztomisableException(
     code=status.HTTP_404_NOT_FOUND,
-    detail=trans("global.errors.not_found"),
+    message=trans("global.errors.not_found"),
     key="not_found",
 )
 

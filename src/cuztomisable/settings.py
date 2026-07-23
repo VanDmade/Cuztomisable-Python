@@ -9,6 +9,7 @@ from cuztomisable.emails import (
     ResetPasswordEmail,
 )
 
+CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 class CuztomisableSettings(BaseSettings):
     app_domain: str = "localhost"
@@ -57,20 +58,38 @@ class CuztomisableSettings(BaseSettings):
         "lock_on_max_attempts": False,
     }
 
-    multi_factor_authentication: dict = {
-        "enabled": True,
-        "send_email": True,
-        "send_phone": False,
+    reset_password: dict = {
+        "with": {
+            "email": True,
+            "phone": False,
+        },
         "code": {
             "length": 6,
-            "characters": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "characters": CHARACTERS,
+            "max_attempts": 5,
+        },
+        "on_change_clear_sessions": True,
+        "login_after": False,
+        "resend_timer": 60,
+        "expires_after": 300,
+    }
+
+    multi_factor_authentication: dict = {
+        "enabled": True,
+        "with": {
+            "email": True,
+            "phone": True,
+        },
+        "code": {
+            "length": 6,
+            "characters": CHARACTERS,
             "regenerate_on_resend": False,
             "max_attempts": 5,
         },
         "resend_timer": 60,
         "expires_after": 300,
         "remember_for_days": 30,
-        "remember": False,
+        "remember": True,
     }
 
     registration: dict = {
@@ -80,13 +99,9 @@ class CuztomisableSettings(BaseSettings):
         },
         "unique_phone": True,
         # Logs the user in automatically after registration, if verification is not required
-        "login_after_registration": True,
+        "login_after": True,
         "require_username": False,
         "require_phone": False,
-    }
-
-    forgot: dict = {
-        "time_between_allowed_resets": 300, # seconds
     }
 
     password_requirements: dict = {

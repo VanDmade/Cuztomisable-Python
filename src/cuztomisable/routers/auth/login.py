@@ -29,12 +29,12 @@ def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user = AuthService(db).find_by_login_type(data.type, data.username)
     unauthorized = CuztomisableException(
         code=status.HTTP_401_UNAUTHORIZED,
-        detail=trans("global.errors.invalid_credentials"),
+        message=trans("global.errors.invalid_credentials"),
         key="invalid_credentials",
     )
     attempt_timer = CuztomisableException(
         code=status.HTTP_401_UNAUTHORIZED,
-        detail=trans("login.errors.too_many_attempts"),
+        message=trans("login.errors.too_many_attempts"),
         key="too_many_attempts",
     )
     if not user:
@@ -42,7 +42,7 @@ def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
     if user.locked:
         raise CuztomisableException(
             code=status.HTTP_401_UNAUTHORIZED,
-            detail=trans("global.errors.account_locked"),
+            message=trans("global.errors.account_locked"),
             key="account_locked",
         )
     now = datetime.now(timezone.utc)

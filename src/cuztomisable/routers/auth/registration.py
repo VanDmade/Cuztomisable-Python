@@ -32,22 +32,19 @@ def register(
 ):
     # Error tracking purposes
     request.state.error_parameters = {"email": data.email}
-
     user_service = UserService(db)
     # Checks to make sure the email is unique
     if user_service.get_by_email(data.email):
         raise CuztomisableException(
             code=status.HTTP_409_CONFLICT,
-            detail=trans("registration.errors.email_already_registered"),
+            message=trans("registration.errors.email_already_registered"),
             key="email_already_registered",
         )
     # Determines if the phone number is unique, if the setting is enabled
-    if (settings("registration.unique_phone", False) and
-        data.phone and
-        user_service.get_by_phone(data.country_code, data.phone)):
+    if settings("registration.unique_phone", False) and data.phone and user_service.get_by_phone(data.country_code, data.phone):
         raise CuztomisableException(
             code=status.HTTP_409_CONFLICT,
-            detail=trans("registration.errors.phone_already_registered"),
+            message=trans("registration.errors.phone_already_registered"),
             key="phone_already_registered",
         )
     registration_service = UserRegistrationService(db)
@@ -58,7 +55,7 @@ def register(
         # Prevents having to output this error message multiple times in the code below
         invalid_code = CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
-            detail=trans("registration.errors.invalid_registration_code"),
+            message=trans("registration.errors.invalid_registration_code"),
             key="invalid_registration_code",
         )
         # Code was not found
@@ -68,7 +65,7 @@ def register(
         if registration.used_at:
             raise CuztomisableException(
                 code=status.HTTP_400_BAD_REQUEST,
-                detail=trans("registration.errors.registration_code_already_used"),
+                message=trans("registration.errors.registration_code_already_used"),
                 key="registration_code_already_used",
             )
         # Code expired
@@ -112,7 +109,7 @@ def register(
             message=trans("registration.success_verification_required", type=verify_via),
         )
     # Flow 2: log the user in immediately
-    if settings("registration.login_after_registration", False):
+    if settings("registration.login_after", False):
         access_token, access_record = UserAccessTokenService(db).create(user.id)
         refresh_record = UserRefreshTokenService(db).create(user.id)
         db.commit()

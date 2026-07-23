@@ -1,11 +1,10 @@
 from typing import Literal, Optional
 
+from cuztomisable.helpers.identify import detect_login_type
 from cuztomisable.schemas.message import MessageResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter, model_validator
 
 from cuztomisable.settings import settings
-
-_PHONE_STRIP_CHARS = ("/", "_", "-", "(", ")", " ")
 
 
 class RefreshRequest(BaseModel):
@@ -43,21 +42,12 @@ class LoginRequest(BaseModel):
         if not isinstance(data, dict):
             return data
         data = dict(data)
-        raw_username = str(data.get("username", "")).strip()
-
-        wants_phone = settings.login["with"]["phone"] and "@" not in raw_username
-        login_type = "phone" if wants_phone else ("email" if settings.login["with"]["email"] else "username")
-
-        if login_type == "phone":
-            for char in _PHONE_STRIP_CHARS:
-                raw_username = raw_username.replace(char, "")
-            # Falls back to email if the cleaned value isn't actually a phone number
-            if not raw_username.isdigit():
-                login_type = "email"
-        elif login_type == "email":
-            raw_username = raw_username.lower()
-
-        data["username"] = raw_username
+        username, login_type = detect_login_type(
+            str(data.get("username", "")),
+            allow_email=settings.login["with"]["email"],
+            allow_phone=settings.login["with"]["phone"],
+        )
+        data["username"] = username
         data["type"] = login_type
         return data
 

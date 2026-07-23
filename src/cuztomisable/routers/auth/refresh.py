@@ -18,13 +18,11 @@ def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
     if not record:
         raise CuztomisableException(
             code=status.HTTP_401_UNAUTHORIZED,
-            detail=trans("global.errors.invalid_or_expired_token"),
+            message=trans("global.errors.invalid_or_expired_token"),
             key="invalid_or_expired_token",
         )
-
     access_token, access_record = UserAccessTokenService(db).create(record.user_id)
     db.commit()
-
     return TokenResponse(
         access_token=access_token,
         refresh_token=record.token,

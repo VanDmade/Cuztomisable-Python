@@ -10,7 +10,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if not current_user.admin:
         raise CuztomisableException(
             code=status.HTTP_403_FORBIDDEN,
-            detail=trans("global.errors.unauthorized"),
+            message=trans("global.errors.unauthorized"),
             key="forbidden",
         )
     return current_user

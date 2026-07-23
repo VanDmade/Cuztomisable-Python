@@ -27,7 +27,7 @@ class UserPasswordService:
         return record
 
     def is_reused(self, user_id: uuid.UUID, plain_password: str) -> bool:
-        limit = settings.reuse_password_after or None
+        limit = settings.reuse_password_after
         if not limit:
             return False
         history = self.get_by_user(user_id)[:limit]

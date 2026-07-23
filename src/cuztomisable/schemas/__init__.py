@@ -10,8 +10,8 @@ from .users import (
     UserRegistrationCreate, UserRegistrationUpdate, UserRegistrationResponse,
     UserAccessTokenResponse,
     UserRefreshTokenResponse,
-    UserPasswordCreate, UserPasswordResponse,
-    UserPasswordResetCreate, UserPasswordResetResponse,
+    ForgotPasswordRequest, ForgotPasswordResponse,
+    VerifyResetCodeQuery, ResetPasswordRequest,
 )
 from .roles import RoleCreate, RoleUpdate, RoleResponse, RolePermissionCreate, RolePermissionResponse
 from .logs import UserLogCreate, UserLogResponse, EmailLogCreate, EmailLogResponse, TextLogCreate, TextLogResponse, ErrorLogCreate, ErrorLogResponse
@@ -40,10 +40,10 @@ __all__ = [
     "UserRegistrationResponse",
     "UserAccessTokenResponse",
     "UserRefreshTokenResponse",
-    "UserPasswordCreate",
-    "UserPasswordResponse",
-    "UserPasswordResetCreate",
-    "UserPasswordResetResponse",
+    "ForgotPasswordRequest",
+    "ForgotPasswordResponse",
+    "VerifyResetCodeQuery",
+    "ResetPasswordRequest",
     "RoleCreate",
     "RoleUpdate",
     "RoleResponse",

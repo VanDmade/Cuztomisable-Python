@@ -52,7 +52,7 @@ class Cuztomisable:
                 # Still print the full traceback to the console — a registered
                 # handler prevents Starlette's own unhandled-exception logging.
                 logger.exception("Unhandled exception during request")
-                cuztomisable_exception = CuztomisableException(code=500, detail=str(exc))
+                cuztomisable_exception = CuztomisableException(code=500, message=str(exc))
 
             debug_code = "".join(random.choices(
                 settings.errors["debug_code"]["characters"],
@@ -66,7 +66,7 @@ class Cuztomisable:
             message = (
                 trans("global.errors.unexpected", debug_code=debug_code)
                 if cuztomisable_exception.status_code >= 500
-                else cuztomisable_exception.detail
+                else cuztomisable_exception.message
             )
             if should_log:
                 db = get_session()
@@ -76,7 +76,7 @@ class Cuztomisable:
                         exc,
                         debug_code=debug_code,
                         code=cuztomisable_exception.key,
-                        message=cuztomisable_exception.detail,
+                        message=cuztomisable_exception.message,
                         parameters={
                             "path": str(request.url),
                             "method": request.method,
@@ -89,9 +89,9 @@ class Cuztomisable:
             else:
                 debug_code = None
             # Prevents issues with leaking server / database errors
-            cuztomisable_exception.detail = message
+            cuztomisable_exception.message = message
             content = {
-                "message": cuztomisable_exception.detail,
+                "message": cuztomisable_exception.message,
                 "parameters": cuztomisable_exception.parameters or {},
             }
             if debug_code:

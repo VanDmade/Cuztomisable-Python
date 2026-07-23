@@ -1,15 +1,24 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
+from cuztomisable.schemas.message import MessageResponse
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
+from typing import Union
+
+from typing import Optional
 
 from cuztomisable.db.models.users.passwords.reset import UserPasswordReset
 from cuztomisable.exceptions import CuztomisableException
 from cuztomisable.helpers.dependencies import get_db
 from cuztomisable.lang import trans
-from cuztomisable.schemas.message import MessageResponse
-from cuztomisable.schemas.password import ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest
+from cuztomisable.schemas.users.password import (
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    ForgotPasswordSendRequest,
+    ResetPasswordRequest,
+    VerifyResetCodeQuery,
+)
+from cuztomisable.schemas.redirect import RedirectMessageResponse
 from cuztomisable.schemas.users.tokens.access import TokenResponse
 from cuztomisable.helpers.security import hash_password
 from cuztomisable.services.users.auth import AuthService
@@ -21,124 +30,185 @@ from cuztomisable.settings import settings
 
 router = APIRouter(prefix="/password/forgot", tags=["Password"])
 
-# Caps how many wrong codes can be tried against a single token before it's
-# burned outright — otherwise the code is just a short string someone could
-# brute-force against a valid (unexpired, unused) token.
-_MAX_CODE_ATTEMPTS = 5
+
+def _invalid_code() -> CuztomisableException:
+    return CuztomisableException(
+        code=status.HTTP_400_BAD_REQUEST,
+        message=trans("password.errors.invalid_reset_code"),
+        key="invalid_reset_code",
+    )
+
+def _code_expired() -> CuztomisableException:
+    return CuztomisableException(
+        code=status.HTTP_400_BAD_REQUEST,
+        message=trans("password.errors.reset_code_expired"),
+        key="reset_code_expired",
+        parameters={"redirect_url": "/password/forgot"},
+    )
+
+def _recently_expired(record: UserPasswordReset) -> bool:
+    if not record.expires_at:
+        return False
+    recently_expired_window = settings("password.forgot.recently_expired_window", 60)
+    return record.expires_at < datetime.now(timezone.utc) and record.expires_at > datetime.now(timezone.utc) - timedelta(seconds=recently_expired_window)
 
 
-def _register_failed_attempt(db: Session, record: UserPasswordReset) -> None:
-    record.attempt_counter += 1
-    if record.attempt_counter >= _MAX_CODE_ATTEMPTS:
-        record.used_at = datetime.now(timezone.utc)
-    db.commit()
+def _validate_record(record: Optional[UserPasswordReset]) -> bool:
+    recently_expired = _recently_expired(record) if record else False
+    if record is None or record.used_at or (record.expires_at < datetime.now(timezone.utc) and not recently_expired):
+        return False
+    if recently_expired:
+        raise _code_expired()
+    return True
 
 
-@router.post("", response_model=ForgotPasswordResponse)
+@router.post("",
+    response_model=RedirectMessageResponse,
+    response_model_exclude_none=True
+)
 def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
     user = AuthService(db).find_by_login_type(data.type or "email", data.username)
     now = datetime.now(timezone.utc)
     message = trans("password.forgot.success")
+    redirect_url = f"/password/reset?username={data.username}"
     if not user:
-        return ForgotPasswordResponse(message=message)
-    # Checks to see if the user has an existing, unexpired, unused reset token
-    record = UserPasswordResetService(db).get_lastest_by_user(user.id)
+        # User doesn't exist and we don't want to give away info for free
+        return RedirectMessageResponse(
+            message=message,
+            url=redirect_url,
+        )
+    resetService = UserPasswordResetService(db)
+    # Checks to see if the user has an existing, unexpired, unused reset code
+    record = resetService.get_lastest_by_user(user.id)
     if record and not record.used_at and record.expires_at > now:
-        last_created = now - timedelta(seconds=settings.forgot["time_between_allowed_resets"])
+        last_created = now - timedelta(seconds=settings("reset_password.resend_timer", 60))
         if record.created_at > last_created:
-            return ForgotPasswordResponse(
-                message=trans("password.forgot.errors.sent_recently")
+            return RedirectMessageResponse(
+                message=trans("password.forgot.errors.sent_recently"),
+                url=redirect_url,
             )
     else:
-        record = UserPasswordResetService(db).create(user.id)
-        # Sends the email with the reset link
-        UserPasswordResetService(db).send_email(user, record)
-    return ForgotPasswordResponse(message=message, token=record.token)
+        record = resetService.create(user.id)
+        if data.type == "phone":
+            # Sends the SMS with the reset code
+            resetService.send_sms(user, record)
+        else:
+            # Sends the email with the reset code
+            resetService.send_email(user, record)
+        # Marks the record as sent and how it was sent
+        record.sent_at = datetime.now(timezone.utc)
+        record.sent_via = data.type
+        db.commit()
+    return RedirectMessageResponse(
+        message=message,
+        url=redirect_url,
+    )
 
 
-@router.get("/{token}/send", response_model=MessageResponse)
-def resend(token: str, db: Session = Depends(get_db)):
-    record = UserPasswordResetService(db).get_by_token(token)
-    if not record or record.used_at:
+@router.post("/send", response_model=MessageResponse)
+def send_code(data: ForgotPasswordSendRequest, db: Session = Depends(get_db)):
+    user = AuthService(db).find_by_login_type(data.type, data.username)
+    success_response = MessageResponse(message=trans("password.resent"))
+    if not user:
+        raise _invalid_code()
+    record = UserPasswordResetService(db).get_lastest_by_user(user.id)
+    # Checks for a record, if it doesn't exist then leave the user here
+    if not _validate_record(record):
+        return success_response
+    resend_timer = settings("password.forgot.resend_timer", 60)
+    if record.sent_at and record.sent_at > datetime.now(timezone.utc) - timedelta(seconds=resend_timer):
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
-            detail=trans("password.errors.invalid_reset_token"),
-            key="invalid_reset_token",
+            message=trans("password.errors.code_sent_too_recently"),
+            key="code_sent_too_recently",
         )
+    if settings("password.forgot.code.regenerate_on_resend", False):
+        record.code = UserPasswordResetService(db).generate_code()
+    if data.type == "email" and user.email and settings("password.forgot.with.email", True):
+        UserPasswordResetService(db).send_email(user, record)
+    elif data.type == "sms" and user.phone and settings("password.forgot.with.phone", True):
+        # TODO :: Implement SMS sending logic here
+        pass
     record.sent_at = datetime.now(timezone.utc)
+    record.sent_via = data.type
     db.commit()
-    return MessageResponse(message=trans("password.forgot.resent"))
+    return success_response
 
 
-@router.get("/{token}/verify", response_model=MessageResponse)
-@router.get("/{token}/verify/{code}", response_model=MessageResponse)
+@router.get("/{code}/verify", response_model=ForgotPasswordResponse)
 def verify(
-    token: str,
-    code: Optional[str] = None,
-    db: Session = Depends(get_db)
+    code: str,
+    query: VerifyResetCodeQuery = Depends(),
+    db: Session = Depends(get_db),
 ):
-    record = UserPasswordResetService(db).get_by_token(token)
-
-    invalid = CuztomisableException(
-        code=status.HTTP_400_BAD_REQUEST,
-        detail=trans("password.errors.invalid_reset_token"),
-        key="invalid_reset_token",
+    user = AuthService(db).find_by_login_type(query.type, query.username)
+    record = UserPasswordResetService(db).get_by_code(code)
+    if not user or not record or record.user_id != user.id:
+        raise _invalid_code()
+    if not _validate_record(record):
+        raise _invalid_code()
+    return ForgotPasswordResponse(
+        message=trans("password.forgot.valid"),
+        username=query.username
     )
-    if not record or record.used_at:
-        raise invalid
-    if record.expires_at and record.expires_at < datetime.now(timezone.utc):
-        raise invalid
-    if code and record.code != code:
-        _register_failed_attempt(db, record)
-        raise invalid
-
-    return MessageResponse(message=trans("password.forgot.valid"))
 
 
-@router.post("/{token}", response_model=TokenResponse)
-def reset(token: str, data: ResetPasswordRequest, request: Request, db: Session = Depends(get_db)):
-    request.state.error_parameters = {"token": token}
-
-    record = UserPasswordResetService(db).get_by_token(token)
-
-    invalid = CuztomisableException(
-        code=status.HTTP_400_BAD_REQUEST,
-        detail=trans("password.errors.invalid_reset_token"),
-        key="invalid_reset_token",
-    )
-    if not record or record.used_at:
-        raise invalid
-    if record.expires_at and record.expires_at < datetime.now(timezone.utc):
-        raise invalid
+@router.post("/", 
+    response_model=Union[TokenResponse, RedirectMessageResponse],
+    response_model_exclude_none=True
+)
+def reset(
+    data: ResetPasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    request.state.error_parameters = {"code": data.code, "username": data.username}
+    user = AuthService(db).find_by_login_type(data.type, data.username)
+    record = UserPasswordResetService(db).get_by_code(data.code)
+    if not user or not record or record.user_id != user.id:
+        raise _invalid_code()
+    if not _validate_record(record):
+        raise _invalid_code()
     if record.code != data.code:
-        _register_failed_attempt(db, record)
-        raise invalid
-
-    user = record.user
+        record.attempt_counter += 1
+        if record.attempt_counter >= settings("reset_password.max_attempts", 5):
+            # Marks it as used so the user can't keep trying to guess it
+            record.used_at = datetime.now(timezone.utc)
+            db.commit()
+            raise CuztomisableException(
+                code=status.HTTP_400_BAD_REQUEST,
+                message=trans("password.errors.reset_code_max_attempts"),
+                key="reset_code_max_attempts",
+            )
     password_service = UserPasswordService(db)
     if password_service.is_reused(user.id, data.password):
         raise CuztomisableException(
             code=status.HTTP_400_BAD_REQUEST,
-            detail=trans("validation.errors.password_recently_used"),
+            message=trans("validation.errors.password_recently_used"),
             key="password_recently_used",
         )
-
+    user.password = hash_password(data.password)
     # Archive the outgoing hash before overwriting it
     password_service.create(user.id, {"password": user.password})
-    user.password = hash_password(data.password)
     record.used_at = datetime.now(timezone.utc)
-
-    # A password reset should kill every other existing session
-    UserRefreshTokenService(db).revoke_all_for_user(user.id)
-    UserAccessTokenService(db).revoke_all_for_user(user.id)
-
+    if settings("reset_password.on_change_clear_sessions", True):
+        # A password reset should kill every other existing session
+        UserRefreshTokenService(db).revoke_all_for_user(user.id)
+        UserAccessTokenService(db).revoke_all_for_user(user.id)
+    message = trans("password.reset.success")
+    if not settings("reset_password.login_after", False):
+        # The developer doesn't want the user logging in automatically
+        db.commit()
+        return RedirectMessageResponse(
+            message=message,
+            url="/login",
+        )
     access_token, access_record = UserAccessTokenService(db).create(user.id)
     refresh_record = UserRefreshTokenService(db).create(user.id)
     db.commit()
-
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_record.token,
         expires_at=access_record.expires_at,
-        message=trans("password.forgot.reset_success"),
+        message=message,
     )
